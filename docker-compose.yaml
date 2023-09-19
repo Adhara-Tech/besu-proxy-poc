@@ -1,0 +1,126 @@
+version: '3'
+services:
+  besu-1:
+    image: hyperledger/besu:22.7.7
+    networks:
+      besu-network-a:
+        ipv4_address: 172.16.238.10
+    ports:
+      - 8545:8545
+    volumes:
+      - ./besu.conf:/etc/besu/besu.conf
+      - ./genesis.json:/etc/besu/genesis.json
+      - ./key-1:/var/lib/besu/key
+      - ./static-nodes-a.json:/var/lib/besu/static-nodes.json
+    command: >
+      --config-file=/etc/besu/besu.conf
+      --genesis-file=/etc/besu/genesis.json
+      --nat-method=NONE
+      --Xdns-enabled=true
+      --Xdns-update-enabled=true
+      --node-private-key-file=/var/lib/besu/key
+      --p2p-port=30303
+      --p2p-host=172.16.238.10
+      --discovery-enabled=false
+      --static-nodes-file=/var/lib/besu/static-nodes.json
+      --identity=besu-1
+  besu-2:
+    image: hyperledger/besu:22.7.7
+    networks:
+      besu-network-a:
+        ipv4_address: 172.16.238.11
+    ports:
+      - 8546:8545
+    volumes:
+      - ./besu.conf:/etc/besu/besu.conf
+      - ./genesis.json:/etc/besu/genesis.json
+      - ./key-2:/var/lib/besu/key
+      - ./static-nodes-a.json:/var/lib/besu/static-nodes.json
+    command: >
+      --config-file=/etc/besu/besu.conf
+      --genesis-file=/etc/besu/genesis.json
+      --nat-method=NONE
+      --Xdns-enabled=true
+      --Xdns-update-enabled=true
+      --node-private-key-file=/var/lib/besu/key
+      --bootnodes=enode://9ff295f955f7e4b191f2b9b714b55ac9c702313c320e99282bed65ee1d0f274b69cb119a20cb31af475aab7cc73afada2ac99ea4b6290b15478fd7c7fb53811b@172.16.238.10:30303
+      --p2p-port=30303
+      --p2p-host=172.16.238.11
+      --discovery-enabled=false
+      --static-nodes-file=/var/lib/besu/static-nodes.json
+      --identity=besu-2
+  besu-3:
+    image: hyperledger/besu:22.7.7
+    networks:
+      besu-network-b:
+        ipv4_address: 172.16.240.10
+    ports:
+      - 8547:8545
+    volumes:
+      - ./besu.conf:/etc/besu/besu.conf
+      - ./genesis.json:/etc/besu/genesis.json
+      - ./key-3:/var/lib/besu/key
+      - ./static-nodes-b.json:/var/lib/besu/static-nodes.json
+    command: >
+      --config-file=/etc/besu/besu.conf
+      --genesis-file=/etc/besu/genesis.json
+      --nat-method=NONE
+      --Xdns-enabled=true
+      --Xdns-update-enabled=true
+      --node-private-key-file=/var/lib/besu/key
+      --bootnodes=enode://9ff295f955f7e4b191f2b9b714b55ac9c702313c320e99282bed65ee1d0f274b69cb119a20cb31af475aab7cc73afada2ac99ea4b6290b15478fd7c7fb53811b@172.16.240.2:30305
+      --p2p-port=30303
+      --p2p-host=172.16.240.10
+      --discovery-enabled=false
+      --static-nodes-file=/var/lib/besu/static-nodes.json
+      --identity=besu-3
+  besu-4:
+    image: hyperledger/besu:22.7.7
+    networks:
+      besu-network-b:
+        ipv4_address: 172.16.240.11
+    ports:
+      - 8548:8545
+    volumes:
+      - ./besu.conf:/etc/besu/besu.conf
+      - ./genesis.json:/etc/besu/genesis.json
+      - ./key-4:/var/lib/besu/key
+      - ./static-nodes-b.json:/var/lib/besu/static-nodes.json
+    command: >
+      --config-file=/etc/besu/besu.conf
+      --genesis-file=/etc/besu/genesis.json
+      --nat-method=NONE
+      --Xdns-enabled=true
+      --Xdns-update-enabled=true
+      --node-private-key-file=/var/lib/besu/key
+      --bootnodes=enode://9ff295f955f7e4b191f2b9b714b55ac9c702313c320e99282bed65ee1d0f274b69cb119a20cb31af475aab7cc73afada2ac99ea4b6290b15478fd7c7fb53811b@172.16.240.2:30305
+      --p2p-port=30303
+      --p2p-host=172.16.240.11
+      --discovery-enabled=false
+      --static-nodes-file=/var/lib/besu/static-nodes.json
+      --identity=besu-4
+  envoy-a:
+    image: envoyproxy/envoy:v1.27.0
+    networks:
+      besu-network-a:
+        ipv4_address: 172.16.238.2
+    volumes:
+      - ./envoy-a.yaml:/etc/envoy/envoy.yaml
+  envoy-b:
+    image: envoyproxy/envoy:v1.27.0
+    networks:
+      besu-network-b:
+        ipv4_address: 172.16.240.2
+    volumes:
+      - ./envoy-b.yaml:/etc/envoy/envoy.yaml
+networks:
+  besu-network-a:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.238.0/24
+  besu-network-b:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.240.0/24
